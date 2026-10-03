@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบเวชระเบียนโรงเรียนภูเขียว</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Bootstrap & Fonts -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  
+  <style>
+    body { font-family: 'Sarabun', sans-serif; font-size: 16px; background-color: #f0f8ff; color: #333; }
+    .header-logos { text-align: center; margin-bottom: 20px; }
+    .header-logos img { max-width: 90px; margin: 0 10px; }
+    .card { border-radius: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-top: 4px solid #0d6efd; background-color: #fff; }
+    .page-section { display: none; }
+    .active-page { display: block; }
+    .navbar { background-color: #0d6efd; }
+    .navbar-brand, .nav-link { color: #fff !important; }
+    
+    /* สีความเร่งด่วน Triage */
+    .triage-red { background-color: #ffcccc; }
+    .triage-pink { background-color: #ffccff; }
+    .triage-yellow { background-color: #ffffcc; }
+    .triage-green { background-color: #ccffcc; }
+    .triage-white { background-color: #ffffff; }
+    .triage-black { background-color: #cccccc; }
+  </style>
+</head>
+<body>
+
+  <!-- ================= Navbar ================= -->
+  <nav class="navbar navbar-expand-lg shadow-sm" id="mainNav" style="display:none;">
+    <div class="container-fluid">
+      <a class="navbar-brand fw-bold" href="#" onclick="showPage('page-home')"><i class="bi bi-hospital"></i> ระบบเวชระเบียน</a>
+      <div class="d-flex">
+        <span class="navbar-text text-white me-3" id="navUserInfo"></span>
+        <button class="btn btn-outline-light btn-sm" onclick="logout()"><i class="bi bi-box-arrow-right"></i> ออกจากระบบ</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container-fluid mt-4 px-4 pb-5">
+    
+    <!-- ================= Header Logos ================= -->
+    <div class="header-logos" id="logos">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSapBA6k-NHnpwzK0clbUziNxp0f5SZwPLakA&s" alt="Logo 1">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLKG0Ux7YaPz0xJ7iXSp-FzQ-ugP5lZjNNnA&s" alt="Logo 2">
+      <h3 class="mt-2 text-primary fw-bold">ระบบเวชระเบียนโรงเรียนภูเขียว</h3>
+      <h5 class="text-secondary">Phukhieo School Medical Records</h5>
+    </div>
+
+    <!-- ================= Container สำหรับทุกหน้า ================= -->
+    <div id="app-content">
+
+      <!-- 1. หน้า Login -->
+      <div id="page-login" class="page-section active-page">
+        <div class="row justify-content-center">
+          <div class="col-md-4">
+            <div class="card p-4">
+              <h4 class="text-center mb-4 text-primary"><i class="bi bi-person-circle"></i> เข้าสู่ระบบ</h4>
+              <div class="mb-3">
+                <label class="fw-bold text-secondary">USERNAME</label>
+                <input type="text" id="loginUser" class="form-control form-control-lg">
+              </div>
+              <div class="mb-4">
+                <label class="fw-bold text-secondary">PASSWORD</label>
+                <input type="password" id="loginPass" class="form-control form-control-lg">
+              </div>
+              <button class="btn btn-primary w-100 btn-lg" id="btnLogin" onclick="doLogin()">LOGIN</button>
+              <div id="loginAlert" class="mt-3 text-danger text-center fw-bold"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. หน้า Home (Dashboard Menu) -->
+      <div id="page-home" class="page-section">
+        <div class="row mt-4" id="homeButtons">
+          <!-- เมนูจะถูกสร้างอัตโนมัติด้วย JavaScript ตามสิทธิ์ -->
+        </div>
+      </div>
+
+      <!-- 3. หน้า Admin -->
+      <div id="page-admin" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-primary"><i class="bi bi-person-badge"></i> การจัดการผู้ดูแลระบบ (Admin)</h4>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+        </div>
+        <div class="card p-4">
+          <h5 class="border-bottom pb-2 text-secondary">เพิ่ม / แก้ไข ข้อมูลเจ้าหน้าที่</h5>
+          <div class="row mt-3 g-3">
+            <div class="col-md-3"><label>Username</label><input type="text" class="form-control" id="adm_user"></div>
+            <div class="col-md-3"><label>Password</label><input type="text" class="form-control" id="adm_pass"></div>
+            <div class="col-md-6"><label>Name - Surname</label><input type="text" class="form-control" id="adm_name"></div>
+            
+            <div class="col-md-4">
+              <label>System location</label>
+              <select class="form-select" id="adm_loc">
+                <option>Admin</option><option>Doctor</option><option>Teacher</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label>Medical position</label>
+              <select class="form-select" id="adm_pos">
+                <option>Student Doctor</option><option>Teacher Doctor</option><option>GP</option>
+                <option>Extern</option><option>Intern</option><option>Resident</option>
+                <option>Fellowship</option><option>STAFF</option>
+              </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+              <button class="btn btn-success w-100" onclick="alert('ระบบพร้อมส่ง API: action=saveAdmin')"><i class="bi bi-save"></i> บันทึกข้อมูล Admin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. หน้า Data (ทะเบียนประวัติผู้ป่วย) -->
+      <div id="page-data" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-primary"><i class="bi bi-folder2-open"></i> จัดการฐานข้อมูลผู้ป่วย (Data)</h4>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+        </div>
+        <div class="card p-4">
+          <h5 class="text-primary border-bottom pb-2"><i class="bi bi-person-lines-fill"></i> Patient Information</h5>
+          
+          <div class="row g-3 mt-1">
+            <div class="col-md-3"><label>1. Upload Photo Patient</label><input type="file" class="form-control" accept="image/*"></div>
+            <div class="col-md-3"><label>2. Upload Photo Fingerprint</label><input type="file" class="form-control" accept="image/*"></div>
+            <div class="col-md-3"><label>3. HN (รันอัตโนมัติ)</label><input type="text" class="form-control bg-light" disabled placeholder="000000"></div>
+            <div class="col-md-3"><label>4. Student Number</label><input type="text" class="form-control" maxlength="5"></div>
+            
+            <div class="col-md-3"><label>5. National ID</label><input type="text" class="form-control" maxlength="13"></div>
+            <div class="col-md-4"><label>6. Name - Surname</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>7. School</label><input type="text" class="form-control"></div>
+            <div class="col-md-2">
+              <label>8. Position</label>
+              <select class="form-select" id="data_pos" onchange="toggleMilitary()">
+                <option>นักเรียน</option><option>ครู</option><option>นักศึกษาวิชาทหาร</option>
+              </select>
+            </div>
+            <div class="col-md-2"><label>9. Class</label><input type="text" class="form-control" placeholder="เช่น ม.1/1"></div>
+            
+            <!-- 10. หมวดนักศึกษาวิชาทหาร (ซ่อนไว้ เริ่มต้น) -->
+            <div class="col-md-10" id="military_section" style="display:none;">
+              <div class="row g-2 p-2 border rounded bg-light">
+                <div class="col-12"><label class="text-success fw-bold">10. ข้อมูลนักศึกษาวิชาทหาร</label></div>
+                <div class="col-md-4"><label>10.1 Company (กองร้อย)</label><input type="number" class="form-control"></div>
+                <div class="col-md-4"><label>10.2 Platoon (หมวด)</label><input type="number" class="form-control"></div>
+                <div class="col-md-4"><label>10.3 Squad (หมู่)</label><input type="number" class="form-control"></div>
+              </div>
+            </div>
+
+            <div class="col-md-2"><label>11. Gender</label><select class="form-select"><option>ชาย</option><option>หญิง</option></select></div>
+            <div class="col-md-3"><label>12. Birthday</label><input type="date" class="form-control" id="data_dob" onchange="calcAge()"></div>
+            <div class="col-md-7">
+              <label>13. Age (คำนวณอัตโนมัติ)</label>
+              <div class="input-group">
+                <input type="text" class="form-control bg-light" id="age_y" disabled placeholder="ปี">
+                <input type="text" class="form-control bg-light" id="age_m" disabled placeholder="เดือน">
+                <input type="text" class="form-control bg-light" id="age_d" disabled placeholder="วัน">
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <label>14. Blood Group</label>
+              <div class="input-group">
+                <select class="form-select"><option>A</option><option>B</option><option>O</option><option>AB</option></select>
+                <select class="form-select"><option>Positive</option><option>Negative</option></select>
+              </div>
+            </div>
+            
+            <div class="col-md-3"><label>15. Nationality</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>16. Ethnicity</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>17. Religion</label><select class="form-select"><option>พุทธ</option><option>คริสต์</option><option>อิสลาม</option><option>เชน</option></select></div>
+            
+            <div class="col-md-4"><label>18. Drug Allergy History</label><input type="text" class="form-control text-danger"></div>
+            <div class="col-md-4"><label>19. Food Allergy History</label><input type="text" class="form-control text-danger"></div>
+            <div class="col-md-4"><label>20. Chronic Disease</label><input type="text" class="form-control"></div>
+            <div class="col-md-4"><label>21. Tel. Patient</label><input type="text" class="form-control" maxlength="10"></div>
+          </div>
+
+          <h5 class="text-primary border-bottom pb-2 mt-5"><i class="bi bi-house-heart"></i> Family Information</h5>
+          <div class="row g-3 mt-1">
+            <div class="col-12"><label class="fw-bold">22. Address</label></div>
+            <div class="col-md-2"><label>22.1 House Number</label><input type="text" class="form-control"></div>
+            <div class="col-md-2"><label>22.2 Village No.</label><input type="text" class="form-control"></div>
+            <div class="col-md-4"><label>22.3 Road</label><input type="text" class="form-control"></div>
+            <div class="col-md-4"><label>22.4 Alley</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>22.5 Subdistrict</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>22.6 District</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>22.7 Province</label><input type="text" class="form-control"></div>
+            <div class="col-md-3"><label>22.8 Postal Code</label><input type="text" class="form-control"></div>
+
+            <div class="col-12 mt-3"><label class="fw-bold">23. Family</label></div>
+            <div class="col-md-6"><label>23.1 Name - Surname Father</label><input type="text" class="form-control"></div>
+            <div class="col-md-6"><label>23.2 Tel. Father</label><input type="text" class="form-control" maxlength="10"></div>
+            <div class="col-md-6"><label>23.3 Name - Surname Mother</label><input type="text" class="form-control"></div>
+            <div class="col-md-6"><label>23.4 Tel. Mother</label><input type="text" class="form-control" maxlength="10"></div>
+            
+            <div class="col-md-4">
+              <label>23.5 Marital Status</label>
+              <select class="form-select" id="data_marital" onchange="toggleSpouse()">
+                <option value="1">โสด</option>
+                <option value="2">มีคู่สมรส</option>
+              </select>
+            </div>
+            <div class="col-md-4"><label>23.6 Name - Surname Spouse</label><input type="text" class="form-control" id="spouse_name" disabled></div>
+            <div class="col-md-4"><label>23.7 Tel. Spouse</label><input type="text" class="form-control" id="spouse_tel" disabled maxlength="10"></div>
+          </div>
+          
+          <hr class="mt-5">
+          <div class="text-end">
+            <button class="btn btn-primary btn-lg" onclick="alert('ระบบพร้อมส่ง API: action=saveData')"><i class="bi bi-cloud-upload"></i> บันทึกประวัติลงฐานข้อมูล</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. หน้า Chemical -->
+      <div id="page-chemical" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-primary"><i class="bi bi-capsule"></i> ระบบยา (Chemical)</h4>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+        </div>
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="card bg-success text-white p-4 shadow-sm">
+              <h5>1.1 Medicine prescribed today</h5>
+              <h1 class="display-4 fw-bold">120 <span class="fs-5">รายการ</span></h1>
+              <small>สรุปยอดการจ่ายยาวันนี้</small>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="card bg-primary text-white p-4 shadow-sm">
+              <h5>1.2 All prescribed medicines</h5>
+              <h1 class="display-4 fw-bold">1,450 <span class="fs-5">รายการ</span></h1>
+              <small>สรุปยอดการจ่ายยาสะสมทั้งหมด</small>
+            </div>
+          </div>
+        </div>
+        <div class="card p-4">
+          <h5 class="text-secondary border-bottom pb-2">สรุปรายการยาที่จ่ายทั้งหมด (สรุปข้อมูล Column N,O,P)</h5>
+          <div class="table-responsive mt-3">
+            <table class="table table-bordered table-hover">
+              <thead class="table-light">
+                <tr><th>ชื่อยา (N)</th><th>ขนาด (O)</th><th>รวมจำนวนที่จ่าย (Sum P)</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Paracetamol</td><td>500 mg</td><td>500 TAB</td></tr>
+                <tr><td>Amoxicillin</td><td>250 mg</td><td>150 TAB</td></tr>
+                <tr><td colspan="3" class="text-center text-muted">... ดึงข้อมูลจาก API ...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. หน้า OPD -->
+      <div id="page-opd" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-primary"><i class="bi bi-clipboard-pulse"></i> ระบบห้องตรวจ (OPD)</h4>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+        </div>
+        
+        <!-- OPD Search Box -->
+        <div class="card p-3 mb-3 shadow-sm bg-white border-0">
+          <div class="row g-2 align-items-center">
+            <div class="col-md-3">
+              <select id="opdSearchType" class="form-select">
+                <option value="hn">1. HN</option>
+                <option value="studentNum">2. Student Number</option>
+                <option value="nationalId">3. National ID</option>
+                <option value="name">4. Name - Surname</option>
+              </select>
+            </div>
+            <div class="col-md-7"><input type="text" id="opdSearchInput" class="form-control" placeholder="ค้นหาข้อมูลผู้ป่วย..."></div>
+            <div class="col-md-2"><button class="btn btn-primary w-100" id="btnSearchOPD" onclick="findPatientOPD()"><i class="bi bi-search"></i> ค้นหา</button></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <!-- OPD Left: Patient Data -->
+          <div class="col-md-4">
+            <div class="card p-3 bg-light border-0 shadow-sm">
+              <h5 class="text-secondary border-bottom pb-2">Patient Information</h5>
+              <div class="text-center mb-3 mt-2">
+                <img id="opdPic" src="https://via.placeholder.com/120" class="rounded-circle shadow-sm" style="width:120px; height:120px; object-fit:cover;">
+              </div>
+              <table class="table table-sm table-borderless mt-2">
+                <tr><th style="width:100px;">HN:</th><td id="opd_hn_txt">-</td></tr>
+                <tr><th>Student No:</th><td id="opd_std_txt">-</td></tr>
+                <tr><th>Name:</th><td id="opd_name_txt" class="fw-bold text-primary">-</td></tr>
+                <tr><th>School:</th><td id="opd_school_txt">-</td></tr>
+                <tr><th>Class:</th><td id="opd_class_txt">-</td></tr>
+                <tr><th>Age:</th><td id="opd_age_txt">-</td></tr>
+                <tr><th>Allergy:</th><td id="opd_allergy_txt" class="text-danger fw-bold">-</td></tr>
+              </table>
+              <button class="btn btn-outline-secondary w-100 mt-2" onclick="showPage('page-data')">Medical History (ดูประวัติทั้งหมด)</button>
+            </div>
+          </div>
+
+          <!-- OPD Right: Illness Data -->
+          <div class="col-md-8">
+            <div class="card p-4 shadow-sm border-0">
+              <h5 class="text-primary border-bottom pb-2">Illness Information</h5>
+              
+              <div class="row g-2 mt-1">
+                <div class="col-md-6">
+                  <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light">Date</span><input type="date" class="form-control" id="opd_date">
+                    <span class="input-group-text bg-light">Time</span><input type="time" class="form-control" id="opd_time">
+                  </div>
+                </div>
+              </div>
+
+              <!-- Vitals -->
+              <div class="row g-2 mt-3">
+                <div class="col-md-3"><label class="small text-muted">Weight (Kg)</label><input type="number" class="form-control form-control-sm"></div>
+                <div class="col-md-3"><label class="small text-muted">Height (cm)</label><input type="number" class="form-control form-control-sm"></div>
+                <div class="col-md-3"><label class="small text-muted">BP (mmHg)</label><input type="text" class="form-control form-control-sm"></div>
+                <div class="col-md-3"><label class="small text-muted">O2 Sat (%)</label><input type="number" class="form-control form-control-sm"></div>
+                <div class="col-md-3 mt-2"><label class="small text-muted">T (°C)</label><input type="number" class="form-control form-control-sm"></div>
+                <div class="col-md-3 mt-2"><label class="small text-muted">PR (BPM)</label><input type="number" class="form-control form-control-sm"></div>
+                <div class="col-md-3 mt-2"><label class="small text-muted">RR (BPM)</label><input type="number" class="form-control form-control-sm"></div>
+              </div>
+
+              <!-- Triage -->
+              <div class="row g-2 mt-3">
+                <div class="col-md-4">
+                  <label class="small text-muted">ประเภทการมา</label>
+                  <select class="form-select form-select-sm"><option>เดิน</option><option>นอน</option><option>นั่ง</option></select>
+                </div>
+                <div class="col-md-8">
+                  <label class="small text-muted">ความเร่งด่วน</label>
+                  <select class="form-select form-select-sm" onchange="this.className='form-select form-select-sm '+this.options[this.selectedIndex].className">
+                    <option class="triage-red">1. Resuscitation/Emergency (สีแดง)</option>
+                    <option class="triage-pink">2. Emergency (สีชมพู)</option>
+                    <option class="triage-yellow">3. Urgent (สีเหลือง)</option>
+                    <option class="triage-green" selected>4. Semi-urgent (สีเขียว)</option>
+                    <option class="triage-white">5. Non-urgent (สีขาว)</option>
+                    <option class="triage-black">6. Black Tag (สีดำ)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mt-3"><label class="small text-muted">อาการ (CC/PI)</label><textarea class="form-control" rows="2"></textarea></div>
+              <div class="mt-3"><label class="small text-muted">ส่งตรวจ (Lab/X-ray)</label><input type="text" class="form-control form-control-sm" placeholder="เลือกรายการจาก lisLab"></div>
+              <div class="mt-3"><label class="small text-muted">ผลการส่งตรวจ / อัปโหลดรูปภาพ</label><input type="file" class="form-control form-control-sm"></div>
+              <div class="mt-3"><label class="small text-muted">วินิจฉัย (Dx)</label><textarea class="form-control" rows="2"></textarea></div>
+
+              <!-- Meds -->
+              <div class="mt-3 bg-light p-3 rounded">
+                <h6 class="text-primary d-flex justify-content-between mb-2">
+                  ยาที่ให้ <button class="btn btn-sm btn-success rounded-circle px-2" onclick="addMedRow()">+</button>
+                </h6>
+                <div id="med-container"></div>
+              </div>
+
+              <div class="mt-3"><label class="small text-muted">หัตถการที่ทำ</label><textarea class="form-control" rows="2"></textarea></div>
+              
+              <div class="row mt-3">
+                <div class="col-md-6">
+                  <label class="small text-muted">นัดหมาย</label>
+                  <div class="input-group input-group-sm"><input type="date" class="form-control"><input type="time" class="form-control"></div>
+                </div>
+                <div class="col-md-6">
+                  <label class="small text-muted">ผู้รับเคส / ตำแหน่ง</label>
+                  <input type="text" class="form-control form-control-sm bg-light" id="opd_receiver" disabled>
+                </div>
+              </div>
+
+              <hr class="mt-4">
+              <div class="d-flex justify-content-end gap-2">
+                <button class="btn btn-warning" onclick="saveOPD('admit')"><i class="bi bi-hospital"></i> Admit in IPD</button>
+                <button class="btn btn-primary" onclick="saveOPD('dc')"><i class="bi bi-check-circle"></i> Save (D/C)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. หน้า IPD -->
+      <div id="page-ipd" class="page-section">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="text-primary"><i class="bi bi-hospital"></i> ระบบผู้ป่วยใน (IPD)</h4>
+          <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+        </div>
+        
+        <!-- ตัวอย่างรายชื่อผู้ป่วยที่ถูก Admit มาจากหน้า OPD -->
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <div class="card p-3 shadow-sm border-0 border-start border-warning border-5" style="cursor:pointer;" onclick="openIPDRecord('000001')">
+              <div class="d-flex align-items-center">
+                <img src="https://via.placeholder.com/70" class="rounded-circle me-3 shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                <div>
+                  <h5 class="mb-0 text-primary">ด.ช. ทดสอบ ระบบ</h5>
+                  <div class="small text-muted mt-1">
+                    HN: 000001 | ร.ร. ภูเขียว<br>
+                    ชั้น: ม.6/1 | กองร้อย 1
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- ผู้ป่วยอื่นๆ จะถูกต่อท้ายในส่วนนี้ผ่าน JavaScript -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // =========================================================================
+    // ⚠️ นำ URL ของ Web App จาก Google Apps Script (ไฟล์ Code.gs) มาใส่ที่นี่
+    // =========================================================================
+    const API_URL = "นำ_WEB_APP_URL_จาก_APPS_SCRIPT_มาใส่ตรงนี้"; 
+
+    let currentUser = {};
+
+    // ---------------------------------------------------------
+    // Utility Functions
+    // ---------------------------------------------------------
+    function showPage(pageId) {
+      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active-page'));
+      document.getElementById(pageId).classList.add('active-page');
+    }
+
+    function logout() {
+      currentUser = {};
+      document.getElementById('mainNav').style.display = 'none';
+      document.getElementById('logos').style.display = 'block';
+      showPage('page-login');
+      document.getElementById('loginUser').value = '';
+      document.getElementById('loginPass').value = '';
+    }
+
+    // ฟังก์ชันเชื่อม API ด้วย Fetch (ป้องกัน CORS ด้วย text/plain)
+    async function callGoogleAPI(payload) {
+      if (API_URL === "นำ_WEB_APP_URL_จาก_APPS_SCRIPT_มาใส่ตรงนี้") {
+        alert("กรุณาใส่ API_URL ที่ได้จากการ Deploy Google Apps Script ในโค้ดก่อนใช้งาน");
+        return { status: 'error', message: 'API URL missing' };
+      }
+      try {
+        let response = await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain' },
+          body: JSON.stringify(payload)
+        });
+        return await response.json();
+      } catch (err) {
+        return { status: 'error', message: 'การเชื่อมต่อขัดข้อง: ' + err.message };
+      }
+    }
+
+    // ---------------------------------------------------------
+    // Login & Home Menu
+    // ---------------------------------------------------------
+    async function doLogin() {
+      const user = document.getElementById('loginUser').value;
+      const pass = document.getElementById('loginPass').value;
+      if(!user || !pass) return;
+
+      const btn = document.getElementById('btnLogin');
+      const alertBox = document.getElementById('loginAlert');
+      btn.innerText = "กำลังตรวจสอบ...";
+      btn.disabled = true;
+      alertBox.innerText = "";
+      
+      let res = await callGoogleAPI({ action: 'login', username: user, password: pass });
+      
+      btn.innerText = "LOGIN";
+      btn.disabled = false;
+
+      if(res.status === 'success') {
+        currentUser = res;
+        document.getElementById('navUserInfo').innerHTML = `<i class="bi bi-person-circle"></i> ${res.name} (${res.medicalPosition})`;
+        document.getElementById('mainNav').style.display = 'flex';
+        document.getElementById('logos').style.display = 'none';
+        setupHomeMenu();
+        showPage('page-home');
+      } else {
+        alertBox.innerText = res.message;
+      }
+    }
+
+    function setupHomeMenu() {
+      const menu = document.getElementById('homeButtons');
+      menu.innerHTML = '';
+      let btns = [];
+      if(currentUser.systemLocation === 'Admin') {
+        btns = [
+          { id: 'admin', icon: 'bi-person-badge', title: 'Admin' },
+          { id: 'data', icon: 'bi-folder2-open', title: 'Data' },
+          { id: 'chemical', icon: 'bi-capsule', title: 'Chemical' },
+          { id: 'opd', icon: 'bi-clipboard-pulse', title: 'OPD' },
+          { id: 'ipd', icon: 'bi-hospital', title: 'IPD' }
+        ];
+      } else if(currentUser.systemLocation === 'Doctor') {
+        btns = [
+          { id: 'opd', icon: 'bi-clipboard-pulse', title: 'OPD' },
+          { id: 'ipd', icon: 'bi-hospital', title: 'IPD' }
+        ];
+      } else if(currentUser.systemLocation === 'Teacher') {
+        btns = [{ id: 'ipd', icon: 'bi-hospital', title: 'IPD' }];
+      }
+      
+      btns.forEach(btn => {
+        menu.innerHTML += `
+          <div class="col-md-4 col-lg-3 mb-4">
+            <button class="btn btn-outline-primary w-100 py-5 fs-3 fw-bold shadow-sm rounded-4" 
+                    onclick="showPage('page-${btn.id}')">
+              <i class="bi ${btn.icon} d-block fs-1 mb-2"></i> ${btn.title}
+            </button>
+          </div>`;
+      });
+    }
+
+    // ---------------------------------------------------------
+    // Data Page Logic
+    // ---------------------------------------------------------
+    function toggleMilitary() {
+      const pos = document.getElementById('data_pos').value;
+      document.getElementById('military_section').style.display = (pos === 'นักศึกษาวิชาทหาร') ? 'block' : 'none';
+    }
+
+    function toggleSpouse() {
+      const ms = document.getElementById('data_marital').value;
+      const isMarried = (ms === '2');
+      document.getElementById('spouse_name').disabled = !isMarried;
+      document.getElementById('spouse_tel').disabled = !isMarried;
+    }
+
+    function calcAge() {
+      const dob = new Date(document.getElementById('data_dob').value);
+      if(isNaN(dob)) return;
+      const now = new Date();
+      let y = now.getFullYear() - dob.getFullYear();
+      let m = now.getMonth() - dob.getMonth();
+      let d = now.getDate() - dob.getDate();
+      if (d < 0) { m--; d += new Date(now.getFullYear(), now.getMonth(), 0).getDate(); }
+      if (m < 0) { y--; m += 12; }
+      document.getElementById('age_y').value = y + " ปี";
+      document.getElementById('age_m').value = m + " เดือน";
+      document.getElementById('age_d').value = d + " วัน";
+    }
+
+    // ---------------------------------------------------------
+    // OPD Page Logic
+    // ---------------------------------------------------------
+    document.getElementById('opd_date').valueAsDate = new Date();
+    const nowTime = new Date();
+    document.getElementById('opd_time').value = nowTime.getHours().toString().padStart(2,'0') + ':' + nowTime.getMinutes().toString().padStart(2,'0');
+
+    function addMedRow() {
+      const div = document.createElement('div');
+      div.className = 'row g-2 mb-2';
+      div.innerHTML = `
+        <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="ชื่อยา"></div>
+        <div class="col-2"><input type="number" class="form-control form-control-sm" placeholder="ขนาด"></div>
+        <div class="col-2"><select class="form-select form-select-sm"><option>mg</option><option>cc</option><option>g</option><option>IU</option><option>TAB</option></select></div>
+        <div class="col-2"><input type="number" class="form-control form-control-sm" placeholder="จำนวน"></div>
+        <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="Rate"></div>
+      `;
+      document.getElementById('med-container').appendChild(div);
+    }
+    addMedRow(); // สร้างแถวแรกเสมอ
+
+    async function findPatientOPD() {
+      const query = document.getElementById('opdSearchInput').value;
+      const type = document.getElementById('opdSearchType').value;
+      const btn = document.getElementById('btnSearchOPD');
+      btn.innerText = 'ค้นหา...';
+      
+      let res = await callGoogleAPI({ action: 'searchPatient', query: query, searchType: type });
+      
+      if (res.status === 'success') {
+        let d = res.data;
+        document.getElementById('opd_hn_txt').innerText = d[4] || '-'; // E
+        document.getElementById('opd_std_txt').innerText = d[5] || '-'; // F
+        document.getElementById('opd_name_txt').innerText = d[7] || '-'; // H
+        document.getElementById('opd_school_txt').innerText = d[8] || '-'; // I
+        document.getElementById('opd_class_txt').innerText = d[10] || '-'; // K
+        document.getElementById('opd_age_txt').innerText = `${d[16]} ปี ${d[17]} ด.`; // Q, R
+        document.getElementById('opd_allergy_txt').innerText = `ยา: ${d[24]} | อาหาร: ${d[25]}`;
+        
+        document.getElementById('opd_receiver').value = `${currentUser.name} (${currentUser.medicalPosition})`;
+      } else {
+        alert(res.message);
+      }
+      btn.innerHTML = '<i class="bi bi-search"></i> ค้นหา';
+    }
+
+    function saveOPD(type) {
+      const hn = document.getElementById('opd_hn_txt').innerText;
+      if(hn === '-') { alert("กรุณาค้นหาและระบุผู้ป่วยก่อนบันทึก"); return; }
+      
+      alert(`จำลองการส่ง API: action=saveOPD\nผู้ป่วย: ${hn}\nคำสั่ง: ${type === 'admit' ? 'นำเข้า IPD' : 'บันทึก D/C'}`);
+    }
+
+    // ---------------------------------------------------------
+    // IPD Page Logic
+    // ---------------------------------------------------------
+    function openIPDRecord(hn) {
+      if (currentUser.systemLocation === 'Teacher') {
+        alert("สถานะ Teacher ไม่สามารถกดเข้าดูรายละเอียดการรักษาแบบเจาะลึกได้");
+        return;
+      }
+      alert("กำลังสลับไปหน้าฟอร์มการรักษา IPD (ฟอร์มเดียวกับ OPD)...");
+      showPage('page-opd');
+    }
+
+  </script>
+</body>
+</html>
