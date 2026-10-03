@@ -1,0 +1,40 @@
+<div id="page-ipd" class="page-section">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-primary"><i class="bi bi-hospital"></i> ระบบผู้ป่วยใน (IPD)</h4>
+    <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+  </div>
+  
+  <!-- รายชื่อผู้ป่วย Admit -->
+  <div class="row" id="ipd-patient-list">
+    <!-- กล่องรายชื่อผู้ป่วย (ดึงข้อมูลจากการ Admit OPD มาแสดงที่นี่) -->
+    
+    <!-- ตัวอย่างกล่องผู้ป่วย -->
+    <div class="col-md-4 mb-3">
+      <div class="card p-3 shadow-sm border-0 border-start border-warning border-4" style="cursor:pointer;" onclick="openIPDRecord('000001')">
+        <div class="d-flex align-items-center">
+          <img src="https://via.placeholder.com/60" class="rounded-circle me-3" style="width: 60px; height: 60px; object-fit: cover;">
+          <div>
+            <h5 class="mb-0 text-primary">ด.ช. ทดสอบ ระบบ</h5>
+            <div class="small text-muted">
+              HN: 000001 | ร.ร. ภูเขียว<br>
+              ชั้น: ม.6/1 | กองร้อย 1 หมวด 2
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+function openIPDRecord(hn) {
+  if (currentUser.systemLocation === 'Teacher') {
+    alert("สถานะ Teacher ไม่สามารถกดเข้าดูรายละเอียดการรักษาได้");
+    return;
+  }
+  // นำไปสู่หน้าฟอร์มที่คล้ายกับ OPD (แต่ดึงข้อมูลจาก IPD Sheet)
+  alert("เปิดฟอร์มรักษา IPD สำหรับ HN: " + hn);
+  // สามารถใช้การซ่อน/แสดง div ฟอร์ม IPD ในหน้านี้ได้ตามหลักการเดียวกับหน้า OPD
+}
+</script>

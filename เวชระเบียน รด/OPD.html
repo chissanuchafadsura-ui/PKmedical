@@ -1,0 +1,171 @@
+<div id="page-opd" class="page-section">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="text-primary"><i class="bi bi-clipboard-pulse"></i> ระบบ OPD</h4>
+    <button class="btn btn-secondary btn-sm" onclick="showPage('page-home')">กลับหน้าหลัก</button>
+  </div>
+  
+  <!-- ระบบค้นหา -->
+  <div class="card p-3 mb-3 shadow-sm bg-white">
+    <div class="row g-2 align-items-center">
+      <div class="col-md-3">
+        <select id="opdSearchType" class="form-select">
+          <option value="hn">1. HN</option>
+          <option value="studentNum">2. Student Number</option>
+          <option value="nationalId">3. National ID</option>
+          <option value="name">4. Name - Surname</option>
+        </select>
+      </div>
+      <div class="col-md-7">
+        <input type="text" id="opdSearchInput" class="form-control" placeholder="กรอกข้อมูลค้นหา...">
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-primary w-100" onclick="findPatientOPD()"><i class="bi bi-search"></i> ค้นหา</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <!-- ซ้าย: ข้อมูลผู้ป่วย (Read only) -->
+    <div class="col-md-4">
+      <div class="card p-3 bg-light border-0 shadow-sm mb-3">
+        <h5 class="text-secondary border-bottom pb-2">Patient Information</h5>
+        <div class="text-center mb-3">
+          <img id="opdPic" src="https://via.placeholder.com/150" class="img-thumbnail rounded" style="width: 150px; height: 150px; object-fit: cover;">
+        </div>
+        <table class="table table-sm table-borderless">
+          <tr><th style="width:100px;">HN:</th> <td id="opd_hn_txt">-</td></tr>
+          <tr><th>Student No:</th> <td id="opd_std_txt">-</td></tr>
+          <tr><th>National ID:</th> <td id="opd_natid_txt">-</td></tr>
+          <tr><th>Name:</th> <td id="opd_name_txt">-</td></tr>
+          <tr><th>Age:</th> <td id="opd_age_txt">-</td></tr>
+          <tr><th>Gender:</th> <td id="opd_gender_txt">-</td></tr>
+          <tr><th>Allergy:</th> <td id="opd_allergy_txt" class="text-danger fw-bold">-</td></tr>
+        </table>
+        <button class="btn btn-outline-secondary btn-sm mt-2 w-100">Medical History</button>
+      </div>
+    </div>
+
+    <!-- ขวา: บันทึกข้อมูลการเจ็บป่วย -->
+    <div class="col-md-8">
+      <div class="card p-4 shadow-sm border-0">
+        <h5 class="text-primary border-bottom pb-2">Illness Information</h5>
+        
+        <div class="row g-2 mt-2">
+          <div class="col-md-6">
+            <div class="input-group input-group-sm">
+              <span class="input-group-text">Date</span>
+              <input type="date" class="form-control" id="opd_date">
+              <span class="input-group-text">Time</span>
+              <input type="time" class="form-control" id="opd_time">
+            </div>
+          </div>
+        </div>
+
+        <!-- Vitals -->
+        <div class="row g-2 mt-2">
+          <div class="col-md-3"><label class="small text-muted">3. Weight (Kg)</label><input type="number" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><label class="small text-muted">4. Height (cm)</label><input type="number" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><label class="small text-muted">5. BP (mmHg)</label><input type="text" class="form-control form-control-sm"></div>
+          <div class="col-md-3"><label class="small text-muted">6. O2 Sat (%)</label><input type="number" class="form-control form-control-sm"></div>
+          <div class="col-md-4 mt-2"><label class="small text-muted">7. T (C)</label><input type="number" class="form-control form-control-sm"></div>
+          <div class="col-md-4 mt-2"><label class="small text-muted">8. PR (BPM)</label><input type="number" class="form-control form-control-sm"></div>
+          <div class="col-md-4 mt-2"><label class="small text-muted">9. RR (BPM)</label><input type="number" class="form-control form-control-sm"></div>
+        </div>
+
+        <div class="row g-2 mt-3">
+          <div class="col-md-4">
+            <label class="small text-muted">10. ประเภทการมา</label>
+            <select class="form-select form-select-sm"><option>เดิน</option><option>นอน</option><option>นั่ง</option></select>
+          </div>
+          <div class="col-md-8">
+            <label class="small text-muted">11. ความเร่งด่วน</label>
+            <select class="form-select form-select-sm" onchange="this.className='form-select form-select-sm '+this.options[this.selectedIndex].className">
+              <option class="triage-red">1. Resuscitation/Emergency (สีแดง)</option>
+              <option class="triage-pink">2. Emergency (สีชมพู)</option>
+              <option class="triage-yellow">3. Urgent (สีเหลือง)</option>
+              <option class="triage-green" selected>4. Semi-urgent (สีเขียว)</option>
+              <option class="triage-white">5. Non-urgent (สีขาว)</option>
+              <option class="triage-black">6. Black Tag (สีดำ)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="small text-muted">12. อาการ (CC/PI)</label>
+          <textarea class="form-control" rows="2"></textarea>
+        </div>
+
+        <div class="mt-3">
+          <label class="small text-muted">15. วินิจฉัย (Dx)</label>
+          <textarea class="form-control" rows="2"></textarea>
+        </div>
+
+        <!-- ยา -->
+        <div class="mt-3 bg-light p-3 rounded">
+          <h6 class="text-primary d-flex justify-content-between">
+            16. ยาที่ให้ <button class="btn btn-sm btn-success" onclick="addMedRow()">+</button>
+          </h6>
+          <div id="med-container">
+            <!-- แถวยา (ถูกเติมด้วย JS) -->
+          </div>
+        </div>
+
+        <div class="mt-3">
+          <label class="small text-muted">ผู้รับเคส / ตำแหน่ง</label>
+          <input type="text" class="form-control form-control-sm bg-light" id="opd_receiver" disabled>
+        </div>
+
+        <hr>
+        <div class="d-flex justify-content-end gap-2">
+          <button class="btn btn-warning" onclick="submitOPD(true)"><i class="bi bi-hospital"></i> Admit in IPD</button>
+          <button class="btn btn-primary" onclick="submitOPD(false)"><i class="bi bi-check-circle"></i> Save (D/C)</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('opd_date').valueAsDate = new Date();
+const now = new Date();
+document.getElementById('opd_time').value = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+
+function addMedRow() {
+  const div = document.createElement('div');
+  div.className = 'row g-2 mb-2 med-row';
+  div.innerHTML = `
+    <div class="col-4"><input type="text" class="form-control form-control-sm" placeholder="16.1 ชื่อยา"></div>
+    <div class="col-2"><input type="number" class="form-control form-control-sm" placeholder="16.2 ขนาด"></div>
+    <div class="col-2">
+      <select class="form-select form-select-sm"><option>mg</option><option>cc</option><option>g</option><option>µg</option><option>IU</option></select>
+    </div>
+    <div class="col-2"><input type="number" class="form-control form-control-sm" placeholder="16.3 จำนวน"></div>
+    <div class="col-2"><input type="text" class="form-control form-control-sm" placeholder="16.4 Rate"></div>
+  `;
+  document.getElementById('med-container').appendChild(div);
+}
+// เพิ่มแถวแรก
+addMedRow();
+
+function findPatientOPD() {
+  const query = document.getElementById('opdSearchInput').value;
+  const type = document.getElementById('opdSearchType').value;
+  
+  google.script.run.withSuccessHandler(res => {
+    if(res.status === 'success') {
+      let d = res.data; // Array ข้อมูลตามคอลัมน์ของ Data Sheet
+      document.getElementById('opd_hn_txt').innerText = d[4] || '-'; // E
+      document.getElementById('opd_std_txt').innerText = d[5] || '-'; // F
+      document.getElementById('opd_natid_txt').innerText = d[6] || '-'; // G
+      document.getElementById('opd_name_txt').innerText = d[7] || '-'; // H
+      document.getElementById('opd_gender_txt').innerText = d[14] || '-'; // O
+      document.getElementById('opd_age_txt').innerText = `${d[16]} ปี ${d[17]} เดือน ${d[18]} วัน`; // Q, R, S
+      document.getElementById('opd_allergy_txt').innerText = `ยา: ${d[24]} | อาหาร: ${d[25]}`; // Y, Z
+      
+      document.getElementById('opd_receiver').value = `${currentUser.name} (${currentUser.medicalPosition})`;
+    } else {
+      alert(res.message);
+    }
+  }).searchPatient(query, type);
+}
+</script>
